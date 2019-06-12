@@ -10,6 +10,7 @@ $(OUTDIR)/%.html $(OUTDIR)/%.latex $(OUTDIR)/%.pdf: %.md
        --bibliography $(DATADIR)/index.yaml \
        --csl $(DATADIR)/cpp.csl \
        --css $(DATADIR)/template/14882.css \
+       --css $(DATADIR)/template/wg21.css \
        --filter pandoc-citeproc \
        --filter $(DATADIR)/filter/wg21.py \
        --highlight-style $(DATADIR)/syntax/wg21.theme \
