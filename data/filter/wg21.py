@@ -251,7 +251,7 @@ def tonytable(table, doc):
     return pf.Table(*rows, **kwargs)
 
 def codeblock(elem, doc):
-    if not isinstance(elem, pf.CodeBlock):
+    if not isinstance(elem, pf.Code) and not isinstance(elem, pf.CodeBlock):
         return None
 
     if not elem.classes:
@@ -264,7 +264,7 @@ def codeblock(elem, doc):
         syntaxdir = os.path.join(datadir, 'syntax')
 
         text = pf.convert_text(
-            elem,
+            pf.Plain(elem) if isinstance(elem, pf.Code) else elem,
             input_format='panflute',
             output_format=doc.format,
             extra_args=[
@@ -282,7 +282,8 @@ def codeblock(elem, doc):
                 # Undo `escapeLaTeX` from https://github.com/jgm/skylighting
                 match = match.replace('\\textbackslash{}', '\\') \
                              .replace('\\{', '{') \
-                             .replace('\\}', '}')
+                             .replace('\\}', '}') \
+                             .replace('\\VerbBar{}', '|')
 
             plain = pf.Plain(*pf.convert_text(match)[0].content)
             return pf.convert_text(
@@ -290,17 +291,24 @@ def codeblock(elem, doc):
                 input_format='panflute',
                 output_format=doc.format)
 
-        result = pf.RawBlock(escape_span.sub(repl, text), doc.format)
+        if isinstance(elem, pf.Code):
+            result = pf.RawInline(escape_span.sub(repl, text), doc.format)
+        elif isinstance(elem, pf.CodeBlock):
+            result = pf.RawBlock(escape_span.sub(repl, text), doc.format)
 
     if 'diff' not in elem.classes:
         return result
 
     # For HTML, this is handled via CSS in `data/template/wg21.html`.
     command = '\\renewcommand{{\\{}}}[1]{{\\textcolor[HTML]{{{}}}{{#1}}}}'
-    return pf.Div(
-        pf.RawBlock(command.format('VariableTok', doc.get_metadata('addcolor')), 'latex'),
-        pf.RawBlock(command.format('StringTok', doc.get_metadata('rmcolor')), 'latex'),
-        result)
+
+    add = command.format('VariableTok', doc.get_metadata('addcolor'))
+    rm = command.format('StringTok', doc.get_metadata('rmcolor'))
+
+    if isinstance(elem, pf.Code):
+        return pf.Span(pf.RawInline(add, 'latex'), pf.RawInline(rm, 'latex'), result)
+    elif isinstance(elem, pf.CodeBlock):
+        return pf.Div(pf.RawBlock(add, 'latex'), pf.RawBlock(rm, 'latex'), result)
 
 # https://github.com/jgm/pandoc/issues/5529
 def strikeout(elem, doc):
