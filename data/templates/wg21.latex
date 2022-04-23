@@ -367,6 +367,7 @@ $endif$
   \newpage \null \vskip 2em
   {\center \LARGE \@title \par}
   \vskip 1.5em
+$if(document)$
   \begin{flushright}
     \begin{tabular}{ll}
 Document \#:&$document$\\
@@ -379,6 +380,7 @@ $endif$
 Reply-to:   \@author
     \end{tabular}
   \end{flushright}
+$endif$
 }
 \makeatother
 $if(csl-refs)$
