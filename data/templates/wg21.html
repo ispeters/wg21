@@ -102,6 +102,16 @@ $endfor$
     </td>
   </tr>
 $endif$
+$if(contributor)$
+  <tr>
+    <td style="vertical-align:top">Contributors:</td>
+    <td>
+$for(contributor)$
+      $contributor.name$<br><$contributor.email$><br>
+$endfor$
+    </td>
+  </tr>
+$endif$
 </table>
 </header>
 $endif$
